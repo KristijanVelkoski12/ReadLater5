@@ -46,5 +46,11 @@ namespace Services
             _ReadLaterDataContext.Categories.Remove(category);
             _ReadLaterDataContext.SaveChanges();
         }
+
+        public bool IsCategoryUsed(Category category)
+        {
+            return _ReadLaterDataContext.Bookmark.Any(b => b.CategoryId == category.ID);
+        }
+
     }
 }

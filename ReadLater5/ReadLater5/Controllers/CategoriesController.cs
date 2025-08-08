@@ -108,8 +108,15 @@ namespace ReadLater5.Controllers
         public IActionResult DeleteConfirmed(int id)
         {
             Category category = _categoryService.GetCategory(id);
-            _categoryService.DeleteCategory(category);
-            return RedirectToAction("Index");
+            if (_categoryService.IsCategoryUsed(category))
+            {
+                return new StatusCodeResult(Microsoft.AspNetCore.Http.StatusCodes.Status409Conflict);
+            }
+            else
+            {
+                _categoryService.DeleteCategory(category);
+                return RedirectToAction("Index");
+            }
         }
     }
 }

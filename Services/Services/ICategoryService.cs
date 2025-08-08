@@ -11,5 +11,6 @@ namespace Services
         Category GetCategory(string Name);
         void UpdateCategory(Category category);
         void DeleteCategory(Category category);
+        bool IsCategoryUsed(Category category);
     }
 }
