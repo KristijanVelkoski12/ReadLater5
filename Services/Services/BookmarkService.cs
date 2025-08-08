@@ -16,6 +16,8 @@ namespace Services
         }
         public Bookmark CreateBookmark(Bookmark bookmark)
         {
+            //Category category = _ReadLaterDataContext.Categories.Where(c => c.Name == bookmark.Category.Name).FirstOrDefault();
+            bookmark.CreateDate = DateTime.Now;
             _ReadLaterDataContext.Add(bookmark);
             _ReadLaterDataContext.SaveChanges();
             return bookmark;
@@ -23,27 +25,31 @@ namespace Services
 
         public void DeleteBookmark(Bookmark bookmark)
         {
-            _ReadLaterDataContext.Update(bookmark);
+            _ReadLaterDataContext.Bookmark.Remove(bookmark);
             _ReadLaterDataContext.SaveChanges();
         }
 
         public Bookmark GetBookmark(int Id)
         {
-            return _ReadLaterDataContext.Bookmarks.Where(b => b.ID == Id).FirstOrDefault();
+            Bookmark bookmark = _ReadLaterDataContext.Bookmark.Where(b => b.ID == Id).FirstOrDefault();
+            bookmark.Category =  _ReadLaterDataContext.Categories.Where(c => c.ID == bookmark.CategoryId).FirstOrDefault();
+
+            return bookmark;
         }
 
         public Bookmark GetBookmarkByCategory(int CathegoryId)
         {
-            return _ReadLaterDataContext.Bookmarks.Where(b => b.CategoryId == CathegoryId).FirstOrDefault();
+            return _ReadLaterDataContext.Bookmark.Where(b => b.CategoryId == CathegoryId).FirstOrDefault();
         }
 
         public List<Bookmark> GetBookmarks()
         {
-            return _ReadLaterDataContext.Bookmarks.ToList();
+            return _ReadLaterDataContext.Bookmark.ToList();
         }
 
         public void UpdateBookmark(Bookmark bookmark)
         {
+            bookmark.CreateDate = DateTime.Now;
             _ReadLaterDataContext.Update(bookmark);
             _ReadLaterDataContext.SaveChanges();
         }
