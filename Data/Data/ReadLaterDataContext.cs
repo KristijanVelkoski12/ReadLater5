@@ -18,5 +18,8 @@ namespace Data
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<Bookmark> Bookmark { get; set; }
+        public DbSet<User> users { get; set; }
+        public DbSet<UserBookmark> UserBookmarks { get; set; }
+        public DbSet<UserCategory> UserCategories { get; set; }
     }
 }

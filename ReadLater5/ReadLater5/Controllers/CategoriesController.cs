@@ -1,32 +1,42 @@
 ﻿using Entity;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Services;
 using System.Collections.Generic;
 
 namespace ReadLater5.Controllers
 {
+    [Authorize]
     public class CategoriesController : Controller
     {
         ICategoryService _categoryService;
-        public CategoriesController(ICategoryService categoryService)
+        UserManager<IdentityUser> _userManager;
+        public CategoriesController(
+            ICategoryService categoryService,
+            UserManager<IdentityUser> userManager
+            )
         {
             _categoryService = categoryService;
+            _userManager = userManager;
         }
         // GET: Categories
         public IActionResult Index()
         {
-            List<Category> model = _categoryService.GetCategories();
+            string userId = _userManager.GetUserId(User);
+            List<Category> model = _categoryService.GetCategories(userId);
             return View(model);
         }
 
         // GET: Categories/Details/5
         public IActionResult Details(int? id)
         {
+            string userId = _userManager.GetUserId(User);
             if (id == null)
             {
                 return new StatusCodeResult(Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest);
             }
-            Category category = _categoryService.GetCategory((int)id);
+            Category category = _categoryService.GetCategory((int)id, userId);
             if (category == null)
             {
                 return new StatusCodeResult(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound);
@@ -48,9 +58,10 @@ namespace ReadLater5.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Category category)
         {
+            string userId = _userManager.GetUserId(User);
             if (ModelState.IsValid)
             {
-                _categoryService.CreateCategory(category);
+                _categoryService.CreateCategory(category, userId);
                 return RedirectToAction("Index");
             }
 
@@ -60,11 +71,12 @@ namespace ReadLater5.Controllers
         // GET: Categories/Edit/5
         public IActionResult Edit(int? id)
         {
+            string userId = _userManager.GetUserId(User);
             if (id == null)
             {
                 return new StatusCodeResult(Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest);
             }
-            Category category = _categoryService.GetCategory((int)id);
+            Category category = _categoryService.GetCategory((int)id, userId);
             if (category == null)
             {
                 return new StatusCodeResult(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound);
@@ -90,11 +102,12 @@ namespace ReadLater5.Controllers
         // GET: Categories/Delete/5
         public IActionResult Delete(int? id)
         {
+            string userId = _userManager.GetUserId(User);
             if (id == null)
             {
                 return new StatusCodeResult(Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest);
             }
-            Category category = _categoryService.GetCategory((int)id);
+            Category category = _categoryService.GetCategory((int)id, userId);
             if (category == null)
             {
                 return new StatusCodeResult(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound);
@@ -107,7 +120,8 @@ namespace ReadLater5.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
-            Category category = _categoryService.GetCategory(id);
+            string userId = _userManager.GetUserId(User);
+            Category category = _categoryService.GetCategory(id, userId);
             if (_categoryService.IsCategoryUsed(category))
             {
                 return new StatusCodeResult(Microsoft.AspNetCore.Http.StatusCodes.Status409Conflict);

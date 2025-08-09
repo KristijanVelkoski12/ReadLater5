@@ -1,34 +1,44 @@
 ﻿using Entity;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Services;
 using System.Collections.Generic;
 
 namespace ReadLater5.Controllers
 {
+    [Authorize]
     public class BookmarksController : Controller
     {
         IBookmarkService _bookmarkService;
+        UserManager<IdentityUser> _userManager;
 
-        public BookmarksController(IBookmarkService bookmarkService)
+        public BookmarksController(
+            IBookmarkService bookmarkService,
+            UserManager<IdentityUser> userManager
+            )
         {
             _bookmarkService = bookmarkService;
+            _userManager = userManager;
         }
 
         // GET: Bookmarks
         public IActionResult Index()
         {
-            List<Bookmark> model = _bookmarkService.GetBookmarks();
+            string userId = _userManager.GetUserId(User);
+            List<Bookmark> model = _bookmarkService.GetBookmarks(userId);
             return View(model);
         }
 
         // GET: Categories/Details/5
         public IActionResult Details(int? id)
         {
+            string userId = _userManager.GetUserId(User);
             if (id == null)
             {
                 return new StatusCodeResult(Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest);
             }
-            Bookmark bookmark = _bookmarkService.GetBookmark((int)id);
+            Bookmark bookmark = _bookmarkService.GetBookmark((int)id, userId);
             if (bookmark == null)
             {
                 return new StatusCodeResult(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound);
@@ -50,9 +60,10 @@ namespace ReadLater5.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Bookmark bookmark)
         {
+            string userId = _userManager.GetUserId(User);
             if (ModelState.IsValid)
             {
-                _bookmarkService.CreateBookmark(bookmark);
+                _bookmarkService.CreateBookmark(bookmark, userId);
                 return RedirectToAction("Index");
             }
 
@@ -62,11 +73,12 @@ namespace ReadLater5.Controllers
         // GET: Categories/Edit/5
         public IActionResult Edit(int? id)
         {
+            string userId = _userManager.GetUserId(User);
             if (id == null)
             {
                 return new StatusCodeResult(Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest);
             }
-            Bookmark bookmark = _bookmarkService.GetBookmark((int)id);
+            Bookmark bookmark = _bookmarkService.GetBookmark((int)id, userId);
             if (bookmark == null)
             {
                 return new StatusCodeResult(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound);
@@ -92,11 +104,12 @@ namespace ReadLater5.Controllers
         // GET: Categories/Delete/5
         public IActionResult Delete(int? id)
         {
+            string userId = _userManager.GetUserId(User);
             if (id == null)
             {
                 return new StatusCodeResult(Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest);
             }
-            Bookmark bookmark = _bookmarkService.GetBookmark((int)id);
+            Bookmark bookmark = _bookmarkService.GetBookmark((int)id, userId);
             if (bookmark == null)
             {
                 return new StatusCodeResult(Microsoft.AspNetCore.Http.StatusCodes.Status404NotFound);
@@ -109,7 +122,8 @@ namespace ReadLater5.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int id)
         {
-            Bookmark bookmark = _bookmarkService.GetBookmark(id);
+            string userId = _userManager.GetUserId(User);
+            Bookmark bookmark = _bookmarkService.GetBookmark(id, userId);
             _bookmarkService.DeleteBookmark(bookmark);
             return RedirectToAction("Index");
         }
